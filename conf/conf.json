@@ -1,0 +1,13 @@
+{
+    "api-key": "xxxx",
+    "api-secret": "xxxx",
+    "exchange-id":"ftx",
+    "symbol":"DOGE",
+    "quote":"USDT",
+    "conf-name":"FTXConf",
+    "time-frame":"1h",
+    "periot":300,
+    "supertrend-period":10,
+    "supertrend-factor":1
+    
+}
