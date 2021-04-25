@@ -15,4 +15,4 @@ edit [conf file](https://github.com/qobel7/crypto2/blob/master/conf/conf.json) w
 
 
 ## Calculate
-    ``` python CalcualteTrades.py <outputCsvName> ```
+``` python CalcualteTrades.py <outputCsvName> ```
