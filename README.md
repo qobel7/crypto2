@@ -3,11 +3,11 @@
 
 edit conf file with your params
 
-##req
+## req
 pip install cctv 
 
 
-#run
+## run
 python __init__.py conf
 
 
