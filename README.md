@@ -5,7 +5,7 @@ edit conf file with your params
 
 ## req
 ### ccvt
-pip install cctv 
+``` pip install cctv ```
 ### talib
 https://mrjbq7.github.io/ta-lib/install.html
 
