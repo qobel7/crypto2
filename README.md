@@ -1,7 +1,7 @@
 # crypto2
 
 
-edit conf file with your params
+edit [conf file](https://github.com/qobel7/crypto2/blob/master/conf/conf.json) with your params
 
 ## req
 ### ccvt
