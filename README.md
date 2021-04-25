@@ -11,6 +11,6 @@ edit [conf file](https://github.com/qobel7/crypto2/blob/master/conf/conf.json) w
 
 
 ## run
-``` python __init__.py confName ```
+``` python __init__.py **confName** ```
 
 
