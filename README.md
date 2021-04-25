@@ -11,6 +11,6 @@ https://mrjbq7.github.io/ta-lib/install.html
 
 
 ## run
-python __init__.py conf
+``` python __init__.py conf ```
 
 
