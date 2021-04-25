@@ -318,7 +318,7 @@ class Operation:
                 fieldnames = ['coinName','type', 'price','date']
                 writer = DictWriter(file, fieldnames=fieldnames)
                 writer.writerow({'coinName':conf['symbol'],'type': signal, 'price': "asdasd",'date':date})
-            sleep(3)
+            sleep(2)
 
 
 

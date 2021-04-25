@@ -5,7 +5,7 @@
     "symbol":"DOGE",
     "quote":"USDT",
     "conf-name":"FTXConf",
-    "time-frame":"1h",
+    "time-frame":"5m",
     "periot":300,
     "supertrend-period":10,
     "supertrend-factor":1
