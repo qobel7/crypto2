@@ -7,7 +7,7 @@
     "conf-name":"FTXConf",
     "time-frame":"5m",
     "periot":300,
-    "supertrend-period":10,
+    "supertrend-period":1,
     "supertrend-factor":1
     
 }
