@@ -1,13 +1,18 @@
 {
     "api-key": "xxxx",
-    "api-secret": "xxxx",
+    "api-secret": "xxx-xxx",
     "exchange-id":"ftx",
     "symbol":"DOGE",
     "quote":"USDT",
     "conf-name":"FTXConf",
+    "indicator":"supertrend",
+    "subaccount":null,
     "time-frame":"5m",
-    "periot":300,
-    "supertrend-period":1,
-    "supertrend-factor":1
+    "periot":500,
+    "supertrend-period":108,
+    "supertrend-factor":0.1,
+    "t3-period":5,
+    "t3-volume-factor":0.7,
+    "test":false
     
 }
