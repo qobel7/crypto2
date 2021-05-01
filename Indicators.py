@@ -4,8 +4,7 @@ import numpy as np
 
 from datetime import datetime
 
-import plotly.graph_objects as plt
-from plotly.subplots import make_subplots
+
 
 class Indicators:
 

@@ -5,7 +5,9 @@ edit [conf file](https://github.com/qobel7/crypto2/blob/master/conf/conf.json) w
 
 ## req
 ### ccxt
-``` pip install ccxt ```
+``` pip install ccxt ```   or    ``` pip3 install ccxt ``` 
+### ccxt
+``` pip install pandas ```  or   ``` pip3 install pandas ``` 
 ### talib
 [talip install link](https://mrjbq7.github.io/ta-lib/install.html)
 

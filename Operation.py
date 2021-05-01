@@ -4,8 +4,7 @@ import numpy as np
 
 from datetime import datetime
 
-import plotly.graph_objects as plt
-from plotly.subplots import make_subplots
+
 from Indicators import Indicators
 from csv import DictWriter
 from datetime import datetime
@@ -282,7 +281,7 @@ class Operation:
         df['Exchange'] = exchange_id
         filename = '{}.csv'.format(timeFrame)
         df = self.indicatorClass.HA(df, use_heikenashi)
-
+        
         self.indicatorClass.SuperTrend(df, supertrend_period, supertrend_factor);
         df["T3"] = self.indicatorClass.generateTillsonT3(df, param=[conf["t3-volume-factor"],conf["t3-period"]])
         #SuperTrend(df, 11, 1);
@@ -300,10 +299,14 @@ class Operation:
         #self.plot_chart(pair, df, [supertrend_signal_price, "T3","Signal","buy_price" ]);
         if(conf["indicator"]=="t3"):
             print("using T3 signal")
-            return self.t3getSignal(df["T3"], conf,exchange)
+            tSignal = self.t3getSignal(df["T3"], conf,exchange)
+            print("signal",tSignal)
+            return tSignal
         else:
             print("using SuperTrend signal")
-            return (df.tail(1))['Signal'].to_string()
+            tSignal = (df.tail(1))['Signal'].to_string()
+            print("signal",tSignal)
+            return tSignal
     def t3getSignal(self,df,conf,exchange):
         status = "None"
         pair = conf['symbol']+"/"+conf['quote']
@@ -337,7 +340,7 @@ class Operation:
             self.exchange(signal,exchange,conf,confFile,pair);
             
            
-            sleep(2)
+            sleep(conf['repeat-second'])
 
 
     def exchange(self,signal,exchange,conf,confFile,pair):
