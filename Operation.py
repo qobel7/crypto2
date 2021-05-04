@@ -4,7 +4,8 @@ import numpy as np
 
 from datetime import datetime
 
-
+import plotly.graph_objects as plt
+from plotly.subplots import make_subplots
 from Indicators import Indicators
 from csv import DictWriter
 from datetime import datetime
@@ -272,7 +273,13 @@ class Operation:
         #self.find_best_parameter(exchange, pair)
         """
         """
-        data = exchange.fetch_ohlcv(symbol = pair, timeframe = timeFrame, since=None, limit=500)
+        data = exchange.fetch_ohlcv(symbol = pair, timeframe = timeFrame, since=None, limit=conf["periot"])
+        if( conf["append-sub-data"]):
+            subData = exchange.fetch_ohlcv(symbol = pair, timeframe = conf["sub-time-frame"], since=None, limit=60);
+            subDataLastIndex= [x[0] for x in subData].index(data[-1][0])
+            for x in subData[subDataLastIndex+1:]: 
+                data.append(x)
+            
         header = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
         df = pd.DataFrame(data, columns=header)#.set_index('Timestamp')
         df['Timestamp'] /= 1000
@@ -296,7 +303,8 @@ class Operation:
         #haDf = super_trend(haDf, 1, 10)
         #print(df.tail(25))
         #print(haDf.tail(25))
-        #self.plot_chart(pair, df, [supertrend_signal_price, "T3","Signal","buy_price" ]);
+        if(conf["show-graph"]):
+            self.plot_chart(pair, df, [supertrend_signal_price, "T3","Signal","buy_price" ]);
         if(conf["indicator"]=="t3"):
             print("using T3 signal")
             tSignal = self.t3getSignal(df["T3"], conf,exchange)
@@ -339,8 +347,10 @@ class Operation:
             signal = self.main(conf['exchange-id'], conf['api-key'], conf['api-secret'], pair, conf['time-frame'], conf['supertrend-period'], conf['supertrend-factor'], exchange,conf['periot'],conf)
             self.exchange(signal,exchange,conf,confFile,pair);
             
-           
-            sleep(conf['repeat-second'])
+            if( conf["show-graph"]):
+                break
+            else:
+                sleep(conf['repeat-second'])
 
 
     def exchange(self,signal,exchange,conf,confFile,pair):

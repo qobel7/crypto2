@@ -14,6 +14,9 @@
     "t3-period":5,
     "t3-volume-factor":0.7,
     "repeat-second":2,
-    "test":false
+    "test":false,
+    "append-sub-data":true,
+    "sub-time-frame":"15m",
+    "show-graph":false
     
 }
