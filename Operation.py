@@ -227,9 +227,10 @@ class Operation:
 
         self.sell(exchange, pair, amount)
 
-    def main(self,exchange_id, api_key, api_secret, pair, timeFrame, supertrend_period, supertrend_factor, exchange,limit,conf,use_heikenashi = True):
+    def main(self,exchange,conf,use_heikenashi = True):
 
-        
+        pair = conf['symbol']+"/"+conf['quote']
+
         #print(exchange.has)
 
         balance = exchange.fetchBalance()
@@ -262,8 +263,7 @@ class Operation:
         markets = exchange.loadMarkets()
         for market in markets:
             data = markets[market]
-            if data['symbol'] == pair:
-                print("data price:", data['info']['price'])
+                
             #if data['symbol'].endswith(quote):
                 #print( data['symbol'] + ' -> change1h  -> %' + str(float(data['info']['change1h'])*100))
                 #print( data['symbol'] + ' -> change24h -> %' + str(float(data['info']['change24h'])*100))
@@ -273,27 +273,28 @@ class Operation:
         #self.find_best_parameter(exchange, pair)
         """
         """
-        data = exchange.fetch_ohlcv(symbol = pair, timeframe = timeFrame, since=None, limit=conf["periot"])
-        if( conf["append-sub-data"]):
-            subData = exchange.fetch_ohlcv(symbol = pair, timeframe = conf["sub-time-frame"], since=None, limit=60);
+        data = exchange.fetch_ohlcv(symbol = pair, timeframe = conf['timeFrame'], since=None, limit=conf['periot'])
+        print("data price:", data[-1][4])
+        if( conf['appendSubData']):
+            subData = exchange.fetch_ohlcv(symbol = pair, timeframe = conf['subTimeFrame'], since=None, limit=60);
             subDataLastIndex= [x[0] for x in subData].index(data[-1][0])
             for x in subData[subDataLastIndex+1:]: 
                 data.append(x)
-            
+        
         header = ['Timestamp', 'Open', 'High', 'Low', 'Close', 'Volume']
         df = pd.DataFrame(data, columns=header)#.set_index('Timestamp')
         df['Timestamp'] /= 1000
         df['Date'] = [datetime.fromtimestamp(x) for x in df['Timestamp']]
         df['Symbol'] = pair
-        df['Exchange'] = exchange_id
-        filename = '{}.csv'.format(timeFrame)
+        df['Exchange'] = conf['exchangeId']
+        filename = '{}.csv'.format(conf['timeFrame'])
         df = self.indicatorClass.HA(df, use_heikenashi)
         
-        self.indicatorClass.SuperTrend(df, supertrend_period, supertrend_factor);
-        df["T3"] = self.indicatorClass.generateTillsonT3(df, param=[conf["t3-volume-factor"],conf["t3-period"]])
+        #self.indicatorClass.SuperTrend(df, conf['supertrendPeriod'], conf['supertrendFactor']);
+        #df["T3"] = self.indicatorClass.generateTillsonT3(df, param=[conf['t3VolumeFactor'],conf['t3Period']])
         #SuperTrend(df, 11, 1);
-        supertrend_signal = 'STX_{0}_{1}'.format(supertrend_period, supertrend_factor)
-        supertrend_signal_price = 'ST_{0}_{1}'.format(supertrend_period, supertrend_factor)
+        supertrend_signal = 'STX_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
+        supertrend_signal_price = 'ST_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
         profit = self.supertrend_strategy(df, supertrend_signal)
         print('%' + str(profit))
         df = df[(df[supertrend_signal_price] > 0)]
@@ -303,18 +304,20 @@ class Operation:
         #haDf = super_trend(haDf, 1, 10)
         #print(df.tail(25))
         #print(haDf.tail(25))
-        if(conf["show-graph"]):
+        if(conf['showGraph']):
             self.plot_chart(pair, df, [supertrend_signal_price, "T3","Signal","buy_price" ]);
-        if(conf["indicator"]=="t3"):
-            print("using T3 signal")
+
+        if(conf['indicator']=="t3"):
             tSignal = self.t3getSignal(df["T3"], conf,exchange)
-            print("signal",tSignal)
-            return tSignal
-        else:
-            print("using SuperTrend signal")
+        elif conf['indicator']=="supertred":
             tSignal = (df.tail(1))['Signal'].to_string()
-            print("signal",tSignal)
-            return tSignal
+        elif conf["indicator"]=="wave":
+            tSignal = self.indicatorClass.wave(data)
+        elif conf["indicator"]=="waveWT1":
+            tSignal = self.indicatorClass.waveWT1(data)
+        print(f"using {conf['indicator']}  signal")
+        print("signal",tSignal)
+        return tSignal
     def t3getSignal(self,df,conf,exchange):
         status = "None"
         pair = conf['symbol']+"/"+conf['quote']
@@ -323,47 +326,46 @@ class Operation:
         if(df[df.index[-1]]<df[df.index[-2]] and df[df.index[-2]]>df[df.index[-3]] and self.lastSignalT3!='sell'):
             status = "sell"
         if(status!="None" ):
-            pair = conf['symbol']+"/"+conf['quote']
             now = datetime.now()
             date = now.strftime("%m/%d/%Y, %H:%M:%S")
-            with open('output/'+conf['exchange-id']+'_'+conf['symbol']+'_T3_'+str(conf['time-frame'])+'.csv', 'a+', newline='') as file:
-                    fieldnames = ['coinName','type', 'price','date']
-                    writer = DictWriter(file, fieldnames=fieldnames)
-                    writer.writerow({'coinName':conf['symbol'],'type': status, 'price': exchange.fetchOrderBook(pair)['bids'][0][0],'date':date})
+            with open('output/'+conf['exchangeId']+'_'+conf['symbol']+'_T3_'+str(conf['timeFrame'])+'.csv', 'a+', newline='') as file:
+                fieldnames = ['coinName','type', 'price','date']
+                writer = DictWriter(file, fieldnames=fieldnames)
+                writer.writerow({'coinName':conf['symbol'],'type': status, 'price': exchange.fetchOrderBook(pair)['bids'][0][0],'date':date})
         return status
         
     def start(self,conf,confFile):
-        exchange = getattr(ccxt, conf['exchange-id'])({
+        exchange = getattr(ccxt, conf['exchangeId'])({
             'enableRateLimit': True, 
-            'apiKey': conf['api-key'],
-            'secret': conf['api-secret']
+            'apiKey': conf['apiKey'],
+            'secret': conf['apiSecret']
         })
-        if(conf["subaccount"]):
+        if(conf['subaccount']):
             exchange.headers = {
                 'FTX-SUBACCOUNT': 'test',
             }
         pair = conf['symbol']+"/"+conf['quote']
         while True:
-            signal = self.main(conf['exchange-id'], conf['api-key'], conf['api-secret'], pair, conf['time-frame'], conf['supertrend-period'], conf['supertrend-factor'], exchange,conf['periot'],conf)
+            signal = self.main(exchange,conf)
             self.exchange(signal,exchange,conf,confFile,pair);
             
-            if( conf["show-graph"]):
+            if( conf['showGraph']):
                 break
             else:
-                sleep(conf['repeat-second'])
+                sleep(conf['repeatSecond'])
 
 
     def exchange(self,signal,exchange,conf,confFile,pair):
         try:
             if(signal.find("buy")>-1 and self.lastSignal!='buy'):
                 self.lastSignal = "buy"
-                if(conf["test"]==False):
-                    self.limit_buy(exchange, conf['api-key'], conf['api-secret'], pair, exchange.fetch_balance()[conf['quote']]['free'])
+                if(conf['test']==False):
+                    self.limit_buy(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['quote']]['free'])
                 self.writeLog(signal, exchange,conf,confFile,pair)
             if(signal.find("sell")>-1 and self.lastSignal!='sell'):
                 self.lastSignal = "sell"
-                if(conf["test"]==False):
-                    self.limit_sell(exchange, conf['api-key'], conf['api-secret'], pair, exchange.fetch_balance()[conf['symbol']]['free'])
+                if(conf['test']==False):
+                    self.limit_sell(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['symbol']]['free'])
                 self.writeLog(signal, exchange,conf,confFile,pair)
         except:
             print("sel buy problem")
@@ -371,7 +373,7 @@ class Operation:
     def writeLog(self,signal,exchange,conf,confFile,pair):
         now = datetime.now()
         date = now.strftime("%m/%d/%Y, %H:%M:%S")
-        with open('output/'+conf['exchange-id']+'_'+confFile+'_'+conf['symbol']+'_sellbuycalculation_'+conf["indicator"]+"_"+str(conf['time-frame'])+'.csv', 'a+', newline='') as file:
+        with open('output/'+conf['exchangeId']+'_'+confFile+'_'+conf['symbol']+'_sellbuycalculation_'+conf['indicator']+"_"+str(conf['timeFrame'])+'.csv', 'a+', newline='') as file:
                 fieldnames = ['coinName','type', 'price','date']
                 writer = DictWriter(file, fieldnames=fieldnames)
                 writer.writerow({'coinName':conf['symbol'],'type': signal[len(signal)-4:len(signal)], 'price': exchange.fetchOrderBook(pair)['bids'][0][0],'date':date})

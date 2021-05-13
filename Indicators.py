@@ -1,7 +1,7 @@
 import ccxt
 import pandas as pd
 import numpy as np
-
+import talib as ta
 from datetime import datetime
 
 
@@ -422,3 +422,105 @@ class Indicators:
         T3 = c1 * e6 + c2 * e5 + c3 * e4 + c4 * e3
 
         return T3    
+
+    def wave(self,data):
+        channel_length = 10
+        average_length = 21
+
+        timeFrame = '15m'
+
+        chandleLimit = 300
+
+        obLevel1 = 60
+        obLevel2 = 53
+
+        osLevel1 = -60
+        osLevel2 = -53
+
+
+        high = [float(entry[2]) for entry in data]
+        low = [float(entry[3]) for entry in data]
+        close = [float(entry[4]) for entry in data]
+
+        close_array = np.asarray(close)
+
+        high_array = np.asarray(high)
+
+        low_array = np.asarray(low)
+
+        # tradingview pine scriptini nerdeyse birebir uyguluyorum, numpy arraylerini kullanarak.
+        # ap, esa, d vs... değerlerini hesapla
+
+        ap = (high_array+low_array+close_array)/3
+
+        esa = ta.EMA(ap, channel_length)
+
+        d = ta.EMA(abs(ap - esa), channel_length)
+
+        ci = (ap - esa) / (0.015 * d)
+
+        wt1 = ta.EMA(ci, average_length)
+        
+        wt2 = ta.SMA(wt1, 4)
+        idx = np.argwhere(np.diff(np.sign(wt1[0:] - wt2[0:]))).flatten()
+        for x in range(50,len(wt1)):
+
+          
+            if wt1[x] >= wt2[x]:
+                position = 'buy'
+            elif wt1[x] < wt2[x]:
+                position = 'sell'
+
+        return position;
+
+
+    def waveWT1(self,data):
+        channel_length = 10
+        average_length = 21
+
+        timeFrame = '15m'
+
+        chandleLimit = 300
+
+        obLevel1 = 60
+        obLevel2 = 53
+
+        osLevel1 = -60
+        osLevel2 = -53
+
+
+        high = [float(entry[2]) for entry in data]
+        low = [float(entry[3]) for entry in data]
+        close = [float(entry[4]) for entry in data]
+
+        close_array = np.asarray(close)
+
+        high_array = np.asarray(high)
+
+        low_array = np.asarray(low)
+
+        # tradingview pine scriptini nerdeyse birebir uyguluyorum, numpy arraylerini kullanarak.
+        # ap, esa, d vs... değerlerini hesapla
+
+        ap = (high_array+low_array+close_array)/3
+
+        esa = ta.EMA(ap, channel_length)
+
+        d = ta.EMA(abs(ap - esa), channel_length)
+
+        ci = (ap - esa) / (0.015 * d)
+
+        wt1 = ta.EMA(ci, average_length)
+        
+        wt2 = ta.SMA(wt1, 4)
+        idx = np.argwhere(np.diff(np.sign(wt1[0:] - wt2[0:]))).flatten()
+        for x in range(50,len(wt1)):
+
+            
+            if wt1[x-2] > wt1[x-1] and wt1[x-1] < wt1[x]:
+                position = 'buy'
+            if wt1[x-2] < wt1[x-1] and wt1[x-1] > wt1[x]:
+                position = 'sell'
+
+
+        return position;
