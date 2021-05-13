@@ -29,13 +29,13 @@ class Operation:
         print(order)
         return order
 
-    def buy(self,exchange, pair, amount):
+    def buy(self,exchange, pair, amount,conf):
         try:
             order_book = exchange.fetchOrderBook(pair)
             price = order_book['bids'][0][0]
             order = self.placeOrder(exchange, pair, 'buy', amount, price)
             amount = amount - order['filled']
-            self.writeLogSelBuy("buy",  pair,exchange.fetchOrder(order['id'])["price"])
+            self.writeLogSelBuy("buy",  pair,exchange.fetchOrder(order['id'])["price"],conf)
 
             while True:
                 order = exchange.fetchOrder(order['id'])
@@ -52,13 +52,13 @@ class Operation:
             print("An exception occurred")
         
 
-    def sell(self,exchange, pair, amount):
+    def sell(self,exchange, pair, amount,conf):
         try:
             order_book = exchange.fetchOrderBook(pair)
             price = order_book['asks'][0][0]
             order = self.placeOrder(exchange, pair, 'sell', amount, price)
             amount = amount - order['filled']
-            self.writeLogSelBuy("sell",  pair,exchange.fetchOrder(order['id'])["price"])
+            self.writeLogSelBuy("sell",  pair,exchange.fetchOrder(order['id'])["price"],conf)
             while True:
                 order = exchange.fetchOrder(order['id'])
                 if order['status'] == 'closed':
@@ -219,13 +219,13 @@ class Operation:
                     profit = self.supertrend_strategy(df, supertrend_signal)
                     print(timeFrame + ';' + str(supertrend_period) + ';' + str(round(supertrend_factor, 1)) + ';' + str(profit))
 
-    def limit_buy(self,exchange, api_key, api_secret, pair, amount):
+    def limit_buy(self,exchange, api_key, api_secret, pair, amount,conf):
 
-        self.buy(exchange, pair, amount)
+        self.buy(exchange, pair, amount,conf)
 
-    def limit_sell(self,exchange, api_key, api_secret, pair, amount):
+    def limit_sell(self,exchange, api_key, api_secret, pair, amount,conf):
 
-        self.sell(exchange, pair, amount)
+        self.sell(exchange, pair, amount,conf)
 
     def main(self,exchange,conf,use_heikenashi = True):
 
@@ -346,13 +346,16 @@ class Operation:
             }
         pair = conf['symbol']+"/"+conf['quote']
         while True:
-            signal = self.main(exchange,conf)
-            self.exchange(signal,exchange,conf,confFile,pair);
-            
-            if( conf['showGraph']):
-                break
-            else:
-                sleep(conf['repeatSecond'])
+            try:
+                signal = self.main(exchange,conf)
+                self.exchange(signal,exchange,conf,confFile,pair);
+                
+                if( conf['showGraph']):
+                    break
+                else:
+                    sleep(conf['repeatSecond'])
+            except:
+                print("sel buy problem")    
 
 
     def exchange(self,signal,exchange,conf,confFile,pair):
@@ -360,12 +363,12 @@ class Operation:
             if(signal.find("buy")>-1 and self.lastSignal!='buy'):
                 self.lastSignal = "buy"
                 if(conf['test']==False):
-                    self.limit_buy(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['quote']]['free'])
+                    self.limit_buy(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['quote']]['free'],conf)
                 self.writeLog(signal, exchange,conf,confFile,pair)
             if(signal.find("sell")>-1 and self.lastSignal!='sell'):
                 self.lastSignal = "sell"
                 if(conf['test']==False):
-                    self.limit_sell(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['symbol']]['free'])
+                    self.limit_sell(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['symbol']]['free'],conf)
                 self.writeLog(signal, exchange,conf,confFile,pair)
         except:
             print("sel buy problem")
@@ -377,10 +380,10 @@ class Operation:
                 fieldnames = ['coinName','type', 'price','date']
                 writer = DictWriter(file, fieldnames=fieldnames)
                 writer.writerow({'coinName':conf['symbol'],'type': signal[len(signal)-4:len(signal)], 'price': exchange.fetchOrderBook(pair)['bids'][0][0],'date':date})
-    def writeLogSelBuy(self,signal,pair,price):
+    def writeLogSelBuy(self,signal,pair,price,conf):
         now = datetime.now()
         date = now.strftime("%m/%d/%Y, %H:%M:%S")
-        with open('output/SellBuy.csv', 'a+', newline='') as file:
+        with open('output/market_SellBuy'+conf['exchangeId']+'_'+conf['indicator']+"_"+str(conf['timeFrame'])+'.csv', 'a+', newline='') as file:
                 fieldnames = ['coinName','type', 'price','date']
                 writer = DictWriter(file, fieldnames=fieldnames)
                 writer.writerow({'coinName':pair,'type': signal, 'price': str(price),'date':date})
