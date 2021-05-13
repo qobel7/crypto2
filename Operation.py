@@ -293,12 +293,12 @@ class Operation:
         #self.indicatorClass.SuperTrend(df, conf['supertrendPeriod'], conf['supertrendFactor']);
         #df["T3"] = self.indicatorClass.generateTillsonT3(df, param=[conf['t3VolumeFactor'],conf['t3Period']])
         #SuperTrend(df, 11, 1);
-        supertrend_signal = 'STX_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
-        supertrend_signal_price = 'ST_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
-        profit = self.supertrend_strategy(df, supertrend_signal)
-        print('%' + str(profit))
-        df = df[(df[supertrend_signal_price] > 0)]
-        df = df.tail(150)
+      #  supertrend_signal = 'STX_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
+      #  supertrend_signal_price = 'ST_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
+      #  profit = self.supertrend_strategy(df, supertrend_signal)
+      #  print('%' + str(profit))
+      #  df = df[(df[supertrend_signal_price] > 0)]
+      #  df = df.tail(150)
         #print(df.tail(50).to_string())
         #df = df.drop(df.index[[0,11]], inplace=True)
         #haDf = super_trend(haDf, 1, 10)

@@ -16,6 +16,10 @@ edit [conf file](https://github.com/qobel7/crypto2/blob/master/conf/conf.json) w
 
 # run
 ``` python __init__.py <confName> ```
+``` python __init__.py conf ```
+``` python __init__.py conf1 ```
+``` python __init__.py conf2 ```
+conf is conf/conf.json file
 
 
 ## Calculate
