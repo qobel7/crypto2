@@ -35,7 +35,9 @@ class Operation:
             price = order_book['bids'][0][0]
             order = self.placeOrder(exchange, pair, 'buy', amount, price)
             amount = amount - order['filled']
-            self.writeLogSelBuy("buy",  pair,exchange.fetchOrder(order['id'])["price"],conf)
+            free = exchange.fetchOrder(order['id'])["price"]*exchange.fetchBalance()[conf['symbol']]['free'];
+            free = free + exchange.fetchBalance()['USDT']['free']
+            self.writeLogSelBuy("buy",  pair,exchange.fetchOrder(order['id'])["price"],conf,exchange,free)
 
             while True:
                 order = exchange.fetchOrder(order['id'])
@@ -58,7 +60,9 @@ class Operation:
             price = order_book['asks'][0][0]
             order = self.placeOrder(exchange, pair, 'sell', amount, price)
             amount = amount - order['filled']
-            self.writeLogSelBuy("sell",  pair,exchange.fetchOrder(order['id'])["price"],conf)
+            free = exchange.fetchOrder(order['id'])["price"]*exchange.fetchBalance()[conf['symbol']]['free'];
+            free = free + exchange.fetchBalance()['USDT']['free']
+            self.writeLogSelBuy("sell",  pair,exchange.fetchOrder(order['id'])["price"],conf,exchange,free)
             while True:
                 order = exchange.fetchOrder(order['id'])
                 if order['status'] == 'closed':
@@ -69,8 +73,8 @@ class Operation:
                 if price != order['price']:
                     exchange.cancelOrder(order['id'])
                     order = placeOrder(exchange, pair, 'sell', amount, price)
-        except:
-            print("An exception occurred")
+        except e:
+            print("An exception occurred"+e)
 
 
     def cross(self,long, short):
@@ -380,11 +384,11 @@ class Operation:
                 fieldnames = ['coinName','type', 'price','date']
                 writer = DictWriter(file, fieldnames=fieldnames)
                 writer.writerow({'coinName':conf['symbol'],'type': signal[len(signal)-4:len(signal)], 'price': exchange.fetchOrderBook(pair)['bids'][0][0],'date':date})
-    def writeLogSelBuy(self,signal,pair,price,conf):
+    def writeLogSelBuy(self,signal,pair,price,conf,exchange,free):
         now = datetime.now()
         date = now.strftime("%m/%d/%Y, %H:%M:%S")
         with open('output/market_SellBuy'+conf['exchangeId']+'_'+conf['indicator']+"_"+str(conf['timeFrame'])+'.csv', 'a+', newline='') as file:
-                fieldnames = ['coinName','type', 'price','date']
+                fieldnames = ['coinName','type', 'price','date',"free"]
                 writer = DictWriter(file, fieldnames=fieldnames)
-                writer.writerow({'coinName':pair,'type': signal, 'price': str(price),'date':date})
+                writer.writerow({'coinName':pair,'type': signal, 'price': str(price),'date':date,'free':free})
 

@@ -26,4 +26,4 @@ class CalcualteTrades:
             result += -(float(buyList[i])-float(sellList[i]))
         print(result)
 
-CalcualteTrades('ftx_conf2_DOGE_sellbuycalculation_waveWT1_5m')
+CalcualteTrades(*argv[1:])

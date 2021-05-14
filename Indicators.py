@@ -514,13 +514,13 @@ class Indicators:
         
         wt2 = ta.SMA(wt1, 4)
         idx = np.argwhere(np.diff(np.sign(wt1[0:] - wt2[0:]))).flatten()
-        for x in range(50,len(wt1)):
 
-            
-            if wt1[x-2] > wt1[x-1] and wt1[x-1] < wt1[x]:
-                position = 'buy'
-            if wt1[x-2] < wt1[x-1] and wt1[x-1] > wt1[x]:
-                position = 'sell'
+        if wt1[-3] > wt1[-2] and wt1[-2] < wt1[-1] and wt1[-1]==wt2[-1]:
+            position = 'buy'
+        elif wt1[-3] < wt1[-2] and wt1[-2] > wt1[-1] and wt1[-1]==wt2[-1]:
+            position = 'sell'
+        else :
+            position = 'none'
 
 
         return position;

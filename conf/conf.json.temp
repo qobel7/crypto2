@@ -1,0 +1,22 @@
+{
+    "apiKey": "xxxx", /** borsa key  */
+    "apiSecret": "xxxxx", /** borsa secret key */
+    "exchangeId":"ftx", /** borsa ismi */
+    "symbol":"DOGE",
+    "quote":"USDT",
+    "confName":"FTXConf",
+    "indicator":"waveWT1",  /** çalışacak indicator isimleri (wave ,waveWT1,supertrend,t3) */
+    "subaccount":null, /** borsadan alt hesap ismi varsa text olarak eklenmeli */
+    "timeFrame":"5m", /** borsadan alınacak candle zaman bilgisi örnek 5 dakikalık*/
+    "periot":300, /** borsadan alınacak candle sayısı*/
+    "supertrendPeriod":1081, /** supertrend parametre */
+    "supertrendFactor":1.1, /** supertrend parametre */
+    "t3Period":3, /** t3 parametre */
+    "t3VolumeFactor":0.7, /** t3 parametre */
+    "repeatSecond":5,  /** repeat time kaç saniyede bir çalışacak uygulama*/
+    "test":false,  /** test =true  ise  al sat çalışmaz sadece loglar*/
+    "appendSubData":false, /** alt candleların eklenip eklenmeyeceği , Örneğin 1h ile çalışıyorsunuz candle sonuna 15 dk'lıkları eklemek istiyorsunuz true setlenmeli  */
+    "subTimeFrame":"15m", /** alt candle ların ekleneceği timeframe  */
+    "showGraph":false /** çalışmadan sadece grafik görmek istiyorsanız  */
+    
+}

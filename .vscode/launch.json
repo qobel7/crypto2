@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "CalcualteTrades.py",
+            "program": "__init__.py",
             "console": "integratedTerminal"
         }
     ]
