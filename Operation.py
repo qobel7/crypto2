@@ -317,7 +317,6 @@ class Operation:
 
     def exchange(self,signal,exchange,conf,confFile,pair):
         try:
-            signal='sell'
             if(signal.find("buy")>-1 and self.lastSignal!='buy'):
                 self.lastSignal = "buy"
                 if(conf['test']==False):
