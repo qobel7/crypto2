@@ -23,7 +23,7 @@ class Operation:
         # elif side == 'sell':
         #     order = exchange.createLimitSellOrder(pair, amount, price)
         if side == 'buy':
-            order = exchange.create_order(pair,'market' ,'buy',amount*100)
+            order = exchange.create_order(pair,'market' ,'buy',amount)
         elif side == 'sell':
             order = exchange.create_order(pair,'market' ,'sell',amount)   
         print(order)
@@ -34,7 +34,7 @@ class Operation:
             order_book = exchange.fetchOrderBook(pair)
             price = order_book['bids'][0][0]
             order = self.placeOrder(exchange, pair, 'buy', amount, price)
-            amount = amount - order['filled']
+            amount = float(amount) - order['filled']
             free = exchange.fetchOrder(order['id'])["price"]*exchange.fetchBalance()[conf['symbol']]['free'];
             free = free + exchange.fetchBalance()['USDT']['free']
             self.writeLogSelBuy("buy",  pair,exchange.fetchOrder(order['id'])["price"],conf,exchange,free)
@@ -50,8 +50,8 @@ class Operation:
                     print(f'price {price}, order {order["price"]}')
                     exchange.cancelOrder(order['id'])
                     order = self.placeOrder(exchange, pair, 'buy', amount, price)
-        except:
-            print("An exception occurred")
+        except Exception as e:
+            print("An exception occurred"+e)
         
 
     def sell(self,exchange, pair, amount,conf):
@@ -59,21 +59,21 @@ class Operation:
             order_book = exchange.fetchOrderBook(pair)
             price = order_book['asks'][0][0]
             order = self.placeOrder(exchange, pair, 'sell', amount, price)
-            amount = amount - order['filled']
+            amount = float(amount) - order['filled']
             free = exchange.fetchOrder(order['id'])["price"]*exchange.fetchBalance()[conf['symbol']]['free'];
             free = free + exchange.fetchBalance()['USDT']['free']
             self.writeLogSelBuy("sell",  pair,exchange.fetchOrder(order['id'])["price"],conf,exchange,free)
-            while True:
-                order = exchange.fetchOrder(order['id'])
-                if order['status'] == 'closed':
-                    break
-                amount = amount - order['filled']
-                order_book = exchange.fetchOrderBook(pair)
-                price = order_book['asks'][0][0]
-                if price != order['price']:
-                    exchange.cancelOrder(order['id'])
-                    order = placeOrder(exchange, pair, 'sell', amount, price)
-        except e:
+            # while True:
+            #     order = exchange.fetchOrder(order['id'])
+            #     if order['status'] == 'closed':
+            #         break
+            #     amount = amount - order['filled']
+            #     order_book = exchange.fetchOrderBook(pair)
+            #     price = order_book['asks'][0][0]
+            #     if price != order['price']:
+            #         exchange.cancelOrder(order['id'])
+            #         order = placeOrder(exchange, pair, 'sell', amount, price)
+        except Exception as e:
             print("An exception occurred"+e)
 
 
@@ -233,50 +233,16 @@ class Operation:
 
     def main(self,exchange,conf,use_heikenashi = True):
 
-        pair = conf['symbol']+"/"+conf['quote']
-
-        #print(exchange.has)
+        pair = conf['symbol']+conf['scr']+conf['quote']
 
         balance = exchange.fetchBalance()
         free_balance = balance['USDT']['free']
         print('free_balance: ' + str(free_balance) + ' USDT')
-        #buy(exchange, pair, 20)
-        #buy(exchange, pair, 100)
-        #sell(exchange, pair, 90)
 
-        #order = exchange.createLimitBuyOrder (pair, 0.5, 1.1)##15195897224
-        #print(order)
-        #print(order['id'])
-        
-        #order_book = exchange.fetchOrderBook(pair)
-        #max_bid = order_book['bids'][0][0]
-        #min_ask = order_book['asks'][0][0]
-        #print(max_bid)
-        #print(min_ask)
-        #print(order_book)
-        #exchange.cancelOrder(order['id'])
-        #exchange.editOrder(id=15195897224, symbol=pair, type='limit', side='buy', amount=0.5, price=1.2)
-
-        #print (exchange.fetchBalance())
-
-        #if (exchange.has['fetchOrder']):
-        #    print(exchange.fetchOrder (id=8539938604))
-        #print(exchange.fetchOrders (pair))
-        #print(exchange.fetchOpenOrders (pair))
-        
         markets = exchange.loadMarkets()
         for market in markets:
             data = markets[market]
-                
-            #if data['symbol'].endswith(quote):
-                #print( data['symbol'] + ' -> change1h  -> %' + str(float(data['info']['change1h'])*100))
-                #print( data['symbol'] + ' -> change24h -> %' + str(float(data['info']['change24h'])*100))
-                #print( data['symbol'] + ' -> changeBod -> %' + str(float(data['info']['changeBod'])*100))
-        
-        
-        #self.find_best_parameter(exchange, pair)
-        """
-        """
+
         data = exchange.fetch_ohlcv(symbol = pair, timeframe = conf['timeFrame'], since=None, limit=conf['periot'])
         print("data price:", data[-1][4])
         if( conf['appendSubData']):
@@ -294,20 +260,7 @@ class Operation:
         filename = '{}.csv'.format(conf['timeFrame'])
         df = self.indicatorClass.HA(df, use_heikenashi)
         
-        #self.indicatorClass.SuperTrend(df, conf['supertrendPeriod'], conf['supertrendFactor']);
-        #df["T3"] = self.indicatorClass.generateTillsonT3(df, param=[conf['t3VolumeFactor'],conf['t3Period']])
-        #SuperTrend(df, 11, 1);
-      #  supertrend_signal = 'STX_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
-      #  supertrend_signal_price = 'ST_{0}_{1}'.format(conf['supertrendPeriod'], conf['supertrendFactor'])
-      #  profit = self.supertrend_strategy(df, supertrend_signal)
-      #  print('%' + str(profit))
-      #  df = df[(df[supertrend_signal_price] > 0)]
-      #  df = df.tail(150)
-        #print(df.tail(50).to_string())
-        #df = df.drop(df.index[[0,11]], inplace=True)
-        #haDf = super_trend(haDf, 1, 10)
-        #print(df.tail(25))
-        #print(haDf.tail(25))
+
         if(conf['showGraph']):
             self.plot_chart(pair, df, [supertrend_signal_price, "T3","Signal","buy_price" ]);
 
@@ -324,7 +277,7 @@ class Operation:
         return tSignal
     def t3getSignal(self,df,conf,exchange):
         status = "None"
-        pair = conf['symbol']+"/"+conf['quote']
+        pair = conf['symbol']+conf['scr']+conf['quote']
         if(df[df.index[-1]]>df[df.index[-2]] and df[df.index[-2]]<df[df.index[-3]] and self.lastSignalT3!='buy'):
             status = "buy"
         if(df[df.index[-1]]<df[df.index[-2]] and df[df.index[-2]]>df[df.index[-3]] and self.lastSignalT3!='sell'):
@@ -348,7 +301,7 @@ class Operation:
             exchange.headers = {
                 'FTX-SUBACCOUNT': 'test',
             }
-        pair = conf['symbol']+"/"+conf['quote']
+        pair = conf['symbol']+conf['scr']+conf['quote']
         while True:
             try:
                 signal = self.main(exchange,conf)
@@ -358,24 +311,33 @@ class Operation:
                     break
                 else:
                     sleep(conf['repeatSecond'])
-            except:
-                print("sel buy problem")    
+            except Exception as e:
+                print("sel buy problem"+e)    
 
 
     def exchange(self,signal,exchange,conf,confFile,pair):
         try:
+            signal='sell'
             if(signal.find("buy")>-1 and self.lastSignal!='buy'):
                 self.lastSignal = "buy"
                 if(conf['test']==False):
-                    self.limit_buy(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['quote']]['free'],conf)
+                    amount = exchange.fetch_balance()["USDT"]['free']*(conf['margin']-0.5)/exchange.fetchOrderBook(pair)['asks'][0][0]
+                    if(float(exchange.fetch_positions()[-1]['openSize'])>0):
+                        self.buy(exchange,  pair, exchange.fetch_positions()[-1]['openSize'],conf)
+                    self.buy(exchange,  pair, amount,conf)
                 self.writeLog(signal, exchange,conf,confFile,pair)
             if(signal.find("sell")>-1 and self.lastSignal!='sell'):
                 self.lastSignal = "sell"
                 if(conf['test']==False):
-                    self.limit_sell(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()[conf['symbol']]['free'],conf)
+                    #self.limit_sell(exchange, conf['apiKey'], conf['apiSecret'], pair, exchange.fetch_balance()['USDT']['free'],conf)
+                    amount = exchange.fetch_balance()["USDT"]['free']*(conf['margin']-0.5)/exchange.fetchOrderBook(pair)['asks'][0][0]
+
+                    if(float(exchange.fetch_positions()[-1]['openSize'])>0):
+                        self.sell(exchange,  pair, exchange.fetch_positions()[-1]['openSize'],conf)
+                    self.sell(exchange, pair, amount,conf)
                 self.writeLog(signal, exchange,conf,confFile,pair)
-        except:
-            print("sel buy problem")
+        except Exception as e: 
+            print("sel buy problem"+e)
         
     def writeLog(self,signal,exchange,conf,confFile,pair):
         now = datetime.now()
@@ -383,7 +345,7 @@ class Operation:
         with open('output/'+conf['exchangeId']+'_'+confFile+'_'+conf['symbol']+'_sellbuycalculation_'+conf['indicator']+"_"+str(conf['timeFrame'])+'.csv', 'a+', newline='') as file:
                 fieldnames = ['coinName','type', 'price','date']
                 writer = DictWriter(file, fieldnames=fieldnames)
-                writer.writerow({'coinName':conf['symbol'],'type': signal[len(signal)-4:len(signal)], 'price': exchange.fetchOrderBook(pair)['bids'][0][0],'date':date})
+                writer.writerow({'coinName':conf['symbol'],'type': signal, 'price': exchange.fetchOrderBook(pair)['bids'][0][0],'date':date})
     def writeLogSelBuy(self,signal,pair,price,conf,exchange,free):
         now = datetime.now()
         date = now.strftime("%m/%d/%Y, %H:%M:%S")
